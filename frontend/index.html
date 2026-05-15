@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Competition Tracker — Manage Your Competitive Journey</title>
+  <meta name="description" content="Track all your competitions, deadlines, and milestones in one beautiful dashboard powered by a local SQLite database." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=DM+Sans:wght@400;500;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css?v=5" />
+
+
+</head>
+<body>
+
+<!-- Clean luxury layout -->
+
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <span class="logo-text">CompTracker</span>
+  </div>
+  <nav class="sidebar-nav">
+    <a href="#" class="nav-item active" data-page="dashboard" id="nav-dashboard">
+      <span>Dashboard</span>
+    </a>
+    <a href="#" class="nav-item" data-page="competitions" id="nav-competitions">
+      <span>Competitions</span>
+    </a>
+    <a href="#" class="nav-item" data-page="timeline" id="nav-timeline">
+      <span>Timeline</span>
+    </a>
+    <a href="#" class="nav-item" data-page="milestones" id="nav-milestones">
+      <span>Tasks</span>
+    </a>
+    <a href="#" class="nav-item" id="nav-coach" aria-controls="chatPanel">
+      <span>AI Coach</span>
+    </a>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="db-badge">
+      <span class="db-dot"></span>
+      <span>SQLite Connected</span>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN CONTENT -->
+<main class="main-content">
+
+  <!-- HEADER -->
+  <header class="top-bar">
+    <div class="top-bar-left">
+      <button class="menu-toggle" id="menuToggle">☰</button>
+      <div class="breadcrumb" id="breadcrumb">Dashboard</div>
+    </div>
+    <div class="top-bar-right">
+      <button class="btn btn-primary" id="globalAddBtn" onclick="openAddCompetitionModal()">
+        <span>+</span> Add Competition
+      </button>
+    </div>
+  </header>
+
+  <!-- DASHBOARD PAGE -->
+  <section class="page active" id="page-dashboard">
+    <div class="page-header">
+      <h1>Your Competitive Journey</h1>
+      <p>Track, manage, and conquer every competition you enter.</p>
+    </div>
+
+    <!-- Stats Row -->
+    <div class="stats-grid" id="statsGrid">
+      <div class="stat-card" id="stat-total">
+        <div class="stat-info">
+          <div class="stat-value" id="statTotal">0</div>
+          <div class="stat-label">Total Competitions</div>
+        </div>
+      </div>
+      <div class="stat-card stat-upcoming">
+        <div class="stat-info">
+          <div class="stat-value" id="statUpcoming">0</div>
+          <div class="stat-label">Upcoming</div>
+        </div>
+      </div>
+      <div class="stat-card stat-active">
+        <div class="stat-info">
+          <div class="stat-value" id="statActive">0</div>
+          <div class="stat-label">Active Now</div>
+        </div>
+      </div>
+      <div class="stat-card stat-completed">
+        <div class="stat-info">
+          <div class="stat-value" id="statCompleted">0</div>
+          <div class="stat-label">Completed</div>
+        </div>
+      </div>
+      <div class="stat-card stat-milestones">
+        <div class="stat-info">
+          <div class="stat-value" id="statMilestones">0</div>
+          <div class="stat-label">Tasks Done</div>
+        </div>
+      </div>
+    </div>
+
+
+
+    <!-- Upcoming Tasks -->
+    <div class="section-header">
+      <h2>Upcoming Tasks</h2>
+    </div>
+    <div id="upcomingMilestones" class="milestone-list">
+      <div class="empty-state small">
+        <p>No upcoming tasks</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- COMPETITIONS PAGE -->
+  <section class="page" id="page-competitions">
+    <div class="page-header">
+      <h1>All Competitions</h1>
+      <p>Manage your full competition portfolio.</p>
+    </div>
+    <div class="filter-bar">
+      <div class="filter-group">
+        <select class="filter-select" id="filterStatus" onchange="loadCompetitions()">
+          <option value="">All Status</option>
+          <option value="upcoming">Upcoming</option>
+          <option value="active">Active</option>
+          <option value="completed">Completed</option>
+          <option value="cancelled">Cancelled</option>
+        </select>
+        <select class="filter-select" id="filterCategory" onchange="loadCompetitions()">
+          <option value="">All Categories</option>
+          <option value="Hackathon">Hackathon</option>
+          <option value="Coding">Coding</option>
+          <option value="Design">Design</option>
+          <option value="Business">Business</option>
+          <option value="Science">Science</option>
+          <option value="Sports">Sports</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+      <button class="btn btn-primary" onclick="openAddCompetitionModal()">+ Add New</button>
+    </div>
+    <div class="cards-grid" id="competitionsList"></div>
+  </section>
+
+  <!-- TIMELINE PAGE -->
+  <section class="page" id="page-timeline">
+    <div class="page-header">
+      <h1>Competition Timeline</h1>
+      <p>Visualize your competitive journey across time.</p>
+    </div>
+    <div id="timelineContainer" class="timeline-wrap"></div>
+  </section>
+
+  <!-- TASKS PAGE -->
+  <section class="page" id="page-milestones">
+    <div class="page-header">
+      <h1>All Tasks</h1>
+      <p>Track every checkpoint across your competitions.</p>
+    </div>
+    <div id="allMilestonesList" class="milestone-list large"></div>
+  </section>
+
+</main>
+
+<!-- ====== MODALS ====== -->
+
+<!-- Add/Edit Competition Drawer -->
+<div class="drawer-overlay" id="competitionModal">
+  <div class="drawer">
+    <div class="drawer-header">
+      <h2 id="compModalTitle">Add Competition</h2>
+      <button class="modal-close" onclick="closeModal('competitionModal')">✕</button>
+    </div>
+    <form id="competitionForm" onsubmit="saveCompetition(event)" class="drawer-form">
+      <input type="hidden" id="compId" />
+      <div class="form-group">
+        <label>Competition Name *</label>
+        <input type="text" id="compName" class="form-input" placeholder="e.g. Google Hackathon 2025" required />
+      </div>
+      <div class="form-grid-2">
+        <div class="form-group">
+          <label>Category *</label>
+          <select class="form-input" id="compCategory" required>
+            <option value="">Select</option>
+            <option value="Hackathon">Hackathon</option>
+            <option value="Coding">Coding</option>
+            <option value="Design">Design</option>
+            <option value="Business">Business</option>
+            <option value="Science">Science</option>
+            <option value="Sports">Sports</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Status</label>
+          <select class="form-input" id="compStatus">
+            <option value="upcoming">Upcoming</option>
+            <option value="active">Active</option>
+            <option value="completed">Completed</option>
+            <option value="cancelled">Cancelled</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-grid-2">
+        <div class="form-group">
+          <label>Start Date *</label>
+          <input type="date" id="compStart" class="form-input" required />
+        </div>
+        <div class="form-group">
+          <label>End Date *</label>
+          <input type="date" id="compEnd" class="form-input" required />
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Location</label>
+        <input type="text" id="compLocation" class="form-input" placeholder="Online / City" />
+      </div>
+      <div class="form-group">
+        <label>Prize / Reward</label>
+        <input type="text" id="compPrize" class="form-input" placeholder="e.g. $5,000 or Certificate" />
+      </div>
+      <div class="form-group">
+        <label>Team Size</label>
+        <input type="number" id="compTeam" class="form-input" min="1" value="1" />
+      </div>
+      <div class="form-group">
+        <label>Description</label>
+        <textarea id="compDesc" class="form-input form-textarea" placeholder="Brief description..."></textarea>
+      </div>
+      <div class="drawer-actions">
+        <button type="button" class="btn btn-ghost" onclick="closeModal('competitionModal')">Cancel</button>
+        <button type="submit" class="btn btn-primary" id="compSubmitBtn">Save Competition</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+
+
+<!-- AI Coach chat (Groq) -->
+<button type="button" class="chat-fab" id="chatFab" aria-label="Open AI coach chat" aria-expanded="false" aria-controls="chatPanel">
+  <span class="chat-fab-icon" aria-hidden="true">✦</span>
+  <span class="chat-fab-text">AI Coach</span>
+</button>
+<div class="chat-panel" id="chatPanel" role="dialog" aria-labelledby="chatPanelTitle" aria-hidden="true">
+  <div class="chat-panel-header">
+    <div>
+      <h2 id="chatPanelTitle">AI Coach</h2>
+      <p class="chat-panel-sub">Powered by Groq. Answers use your saved competitions as context. Messages stay in your local SQLite database.</p>
+    </div>
+    <button type="button" class="chat-panel-close" id="chatClose" aria-label="Close AI coach">✕</button>
+  </div>
+  <div class="chat-messages" id="chatMessages"></div>
+  <div class="chat-typing" id="chatTyping" hidden>Coach is thinking…</div>
+  <form class="chat-form" id="chatForm">
+    <label class="visually-hidden" for="chatInput">Message</label>
+    <textarea id="chatInput" class="chat-input" rows="2" placeholder="Ask about prep, timelines, or your next competition…" maxlength="4000" required></textarea>
+    <button type="submit" class="btn btn-primary chat-send" id="chatSendBtn">Send</button>
+  </form>
+</div>
+
+<!-- Toast notification -->
+<div class="toast" id="toast"></div>
+
+<script src="app.js?v=6"></script>
+</body>
+</html>
